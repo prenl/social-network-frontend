@@ -88,17 +88,15 @@ import axios from 'axios'
             post_data: {
                 type: Object,
                 required: true
+            },
+            user_data: {
+                type: Object, 
+                required: true
             }
         },
         methods: {},
         data() {
             return {
-                user_data: {
-                    id: 1,
-                    firstName: "Yelka",
-                    lastName: "Abdrakhmanov",
-                    username: "prenl",
-                },
                 userId: Number,
                 post_time: Date,
                 liked_users: []

@@ -19,7 +19,7 @@
             </p>
             <div class="card__buttons">
                 <router-link :to="{ name: 'profile', params: { id: user.id } }" class="btn btn-success">View Profile</router-link>
-                <a href="#" class="btn btn-follow">Follow</a>
+                <a href="#" class="btn btn-follow"  v-if="currentUserId != user.id">Follow</a>
             </div>
         </div>
       </div>
@@ -31,10 +31,8 @@
             user: {
                 type: Object,
                 required: true
-            }
-        },
-        data() {
-            return {}
+            },
+            currentUserId: Number
         }
     }
 </script>

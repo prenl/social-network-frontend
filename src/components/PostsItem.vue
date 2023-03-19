@@ -4,20 +4,20 @@
             <div class="d-flex flex-start align-items-center">
                 <img 
                     class="shadow-1-strong me-3 avatar" 
-                    src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="60"
+                    src="@/assets/images/avatar-placeholder.jpeg" alt="avatar" width="60"
                     height="60" 
                     @click="reloadPage"
                 />
                 <div>
                     <h6 class="mb-1">
                         <router-link 
+                            v-if="post_data.author.id"
                             :to="{
                                 name:'profile', 
-                                params: {id: user_data.id}
+                                params: {id: post_data.author.id}
                             }"
-                            @click="reloadPage"
                             class="post__author"
-                        >{{ user_data.username }} ({{ user_data.firstName }} {{ user_data.lastName }})</router-link>
+                        >{{ post_data.author.login }} ({{ post_data.author.firstName }} {{ post_data.author.lastName }})</router-link>
                     </h6>
                     <p class="text-muted small mb-0">{{ post_time }}</p>
                 </div>
@@ -33,7 +33,12 @@
             </div>
             
             <div class="small d-flex justify-content-start">
-                <a href="#!" class="d-flex align-items-center me-1 particle particle-like" style="text-decoration: none; position: relative">
+                <a 
+                    href="#!" 
+                    class="d-flex align-items-center me-1 particle particle-like" 
+                    style="text-decoration: none; position: relative"
+                    @click="likePost"
+                >
                     <i class="fa-solid fa-heart"></i>&nbsp;{{ post_data.likes }}
                 </a>
                     <div class="liked-by" v-if="liked_users.length == 0">
@@ -83,6 +88,7 @@
     // import axios from 'axios';
 
 import axios from 'axios'
+import { api } from '@/api'
 
     export default {
         props: {
@@ -93,17 +99,16 @@ import axios from 'axios'
         },
         methods: {
             reloadPage() {
-                this.$router.go(this.$router.currentRoute)
+                this.$router.go({name: 'profile', params: {id: this.post_data.author.id}})
+            },
+            async likePost() {
+                if(!(localStorage in this.liked_users)) {
+                    await api.likePost(localStorage.userId, this.post_data.id)
+                }
             }
         },
         data() {
             return {
-                user_data: {
-                    id: 1,
-                    firstName: "Yelka",
-                    lastName: "Abdrakhmanov",
-                    username: "prenl",
-                },
                 userId: Number,
                 post_time: Date,
                 liked_users: []

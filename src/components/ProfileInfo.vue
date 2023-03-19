@@ -92,6 +92,15 @@
                                 >
                                     Edit profile
                                 </button>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-outline-dark btn-follow" 
+                                    data-mdb-ripple-color="dark"
+                                    style="z-index: 1;"
+                                    v-else
+                                >
+                                    Follow
+                                </button>
                             </div>
                             <div class="ms-3" style="margin-top: 130px;">
                                 <h5>{{ user_data.login }}</h5>
@@ -115,7 +124,7 @@
                                     <p class="small text-muted mb-0">Following</p>
                                 </div>
                             </div>
-                            </div>
+                        </div>
                             <div class="card-body p-4 text-black">
                                 <div class="mb-5">
                                     <p class="lead fw-normal mb-1">About</p>
@@ -123,6 +132,29 @@
                                         <p class="font-italic mb-1">{{ user_data.info }}</p>
                                     </div>
                                 </div>
+                                <div 
+                                    class="form-outline mb-4" 
+                                    style="display: flex; flex-direction: column"
+                                    v-if="storage.userId == user_data.id"
+                                >
+                                    <input 
+                                        type="text"
+                                        class="form-control-lg post-title" 
+                                        placeholder="Post Title"
+                                        @input="this.newPostTitle = $event.target.value"
+                                        v-bind:value="newPostTitle"
+                                    />
+                                    <textarea 
+                                        type="text"
+                                        class="form-control-lg post-content" 
+                                        placeholder="Post Title"
+                                        rows="4"
+                                        @input="this.newPostContent = $event.target.value"
+                                        v-bind:value="newPostContent"
+                                    />
+                                    <button class="btn btn-outline-success" @click="sendNewPost">Send post</button>
+                                </div>
+                                <hr style="margin-bottom: 10px;">
                                 <div v-if="user_posts.length > 0" class="d-flex justify-content-between align-items-center mb-4">
                                     <p class="lead fw-normal mb-0">Recent posts</p>
                                     <p class="mb-0"><a href="#!" class="text-muted">Show all</a></p>
@@ -154,12 +186,15 @@ export default {
     data() {
         return {
             user_data: {},
+            currentUserId: Number,
             user_followers: [],
             user_followings: [],
             user_posts: [],
             storage: {},
             followersOverlay: false,
-            followingsOverlay: false
+            followingsOverlay: false,
+            newPostTitle: "",
+            newPostContent: ""
         }
     },
     watch: {
@@ -207,7 +242,21 @@ export default {
 
             // axios.get('http://localhost:8889/api/users/' + this.$route.params.id).then(response => this.user_data = response.data)
             // axios.get('http://localhost:8889/api/posts/postsBy' + this.$route.params.id).then(response => this.user_posts = response.data)
-        }   
+        },
+        async sendNewPost() {
+            if (this.newPostTitle.length >= 4) {
+                if (this.newPostContent.length >= 4) {
+                    await api.sendPost(this.newPostTitle, this.newPostContent, localStorage.userId)
+                    this.newPostTitle = "",
+                    this.newPostContent = ""
+                } else {
+                    alert("Post content should be longer than 4")
+                }
+            } else {
+                alert("Post title should be longer than 4!")
+            }
+            this.$router.go()
+        }
     },
     mounted() {
         this.storage = localStorage
@@ -283,5 +332,29 @@ export default {
         }
 
     }
+}
+.btn-follow {
+    border: 1px solid rgb(255, 138, 168);
+    background-color: rgb(255, 138, 168);
+    color: white;
+
+    transition: .1s linear;
+}
+
+.btn-follow:hover {
+    border: 1px solid rgb(255, 138, 168);
+    color: rgb(255, 138, 168);
+    background-color: white;
+}
+
+.post-title {
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.post-content {
+    font-weight: 400;
+    font-size: 18px;
+    
 }
 </style>

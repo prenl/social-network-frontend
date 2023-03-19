@@ -5,6 +5,7 @@
                 v-for="user in users"
                 :key="user.id"
                 :user="user"
+                :currentUserId="currentUser.id"
             />
         </div>
         <div class="loading" v-else>Loading...</div>
@@ -21,14 +22,16 @@
         },
         data() {
             return {
-                users: []
+                users: [],
+                currentUser: {}
             }
         },
         async mounted() {
-            const response = await api.fetchUsers()
+            let response = await api.fetchUsers()
             this.users = response.data
-            // axios.get('http://localhost:8889/api/users').then(response => this.users = response.data)
-            // console.log(this.users)
+            response = await api.fetchUser(localStorage.userId)
+            this.currentUser = response.data
+            console.log(this.currentUser.id)
         }
     }
 

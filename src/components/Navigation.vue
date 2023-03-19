@@ -58,12 +58,13 @@
         if (localStorage.userId) {
           localStorage.removeItem('userId')
         }
+        this.$router.push({ name: 'login' })
       }
     },
     async mounted() {
       if(localStorage.userId && localStorage.token) {
-        const response = await api.fetchUsers()
-        this.currentUser = response.data[0]
+        const response = await api.fetchUser(localStorage.userId)
+        this.currentUser = response.data
       } else {
         this.$router.push({ name: 'login' })
       }
