@@ -14,8 +14,18 @@ export const api = {
         content: postContent
     }),
 
+    fetchUserPosts: (userId) => axiosInstance.get(`/users/${userId}/posts`),
+
     likePost: (userId, postId) => axios.post(`http://localhost:8889/api/posts/${postId}/like/${userId}`),
 
-    fetchFeed: (userId) => axiosInstance.get(`feed/${userId}`)
+    fetchFeed: (userId) => axiosInstance.get(`feed/${userId}`),
+
+    sendComment: (userId, postId, content) => axios.post(`http://localhost:8889/api/posts/${postId}/comment/${userId}`, {
+        content: content
+    }),
+
+    fetchUserFollowers: (userId) => axiosInstance.get(`/users/${userId}/followers`),
+
+    fetchUserFollowings: (userId) => axiosInstance.get(`/users/${userId}/followings`)
 
 }

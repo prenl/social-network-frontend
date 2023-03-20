@@ -4,7 +4,7 @@
             <div class="d-flex flex-start align-items-center">
                 <img 
                     class="shadow-1-strong me-3 avatar" 
-                    src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="60"
+                    src="@/assets/images/avatar-placeholder.jpeg" alt="avatar" width="60"
                     height="60" 
                     @click="reloadPage"
                 />
@@ -13,10 +13,10 @@
                         <router-link 
                             :to="{
                                 name:'profile', 
-                                params: {id: user_data.id}
+                                params: { id: post_data.author.id }
                             }"
                             class="post__author"
-                        >{{ user_data.username }} ({{ user_data.firstName }} {{ user_data.lastName }})</router-link>
+                        >{{ post_data.author.login }} ({{ post_data.author.firstName }} {{ post_data.author.lastName }})</router-link>
                     </h6>
                     <p class="text-muted small mb-0">{{ this.post_data.dateOfCreated }}</p>
                 </div>
@@ -32,7 +32,19 @@
             </div>
             
             <div class="small d-flex justify-content-start">
-                <a href="#!" class="d-flex align-items-center me-1 particle particle-like" style="text-decoration: none; position: relative">
+                <a 
+                    v-if="currentUser in liked_users"
+                    class="d-flex align-items-center me-1 particle particle-liked" 
+                    style="text-decoration: none; position: relative;"
+                >
+                    <i class="fa-solid fa-heart"></i>&nbsp;{{ post_data.likes }}
+                </a>
+                <a 
+                    v-else
+                    class="d-flex align-items-center me-1 particle particle-like" 
+                    style="text-decoration: none; position: relative"
+                    @click="likePost"
+                >
                     <i class="fa-solid fa-heart"></i>&nbsp;{{ post_data.likes }}
                 </a>
                     <div class="liked-by" v-if="liked_users.length == 0">
@@ -45,10 +57,14 @@
                         Liked by: <b v-for="i in 4" :key="liked_users[i-1].id"><br>{{ liked_users[i-1].username }}</b>
                         <br>and others
                     </div>
-                <a href="#!" class="d-flex align-items-center me-1 particle" style="text-decoration: none;">
+                <a 
+                    class="d-flex align-items-center me-1 particle" 
+                    style="text-decoration: none; cursor: pointer"
+                    @click="openSinglePost"
+                >
                     <i class="fa-solid fa-comment"></i>&nbsp;{{ post_data.commentaries }}
                 </a>
-                <a href="#!" class="d-flex align-items-center me-1 particle" style="text-decoration: none;">
+                <a class="d-flex align-items-center me-1 particle" style="text-decoration: none;">
                     <i class="fa-solid fa-share"></i>&nbsp;{{ post_data.shares }}
                 </a>
             </div>
@@ -82,30 +98,40 @@
     // import axios from 'axios';
 
 import axios from 'axios'
+import { api } from '@/api'
 
     export default {
         props: {
             post_data: {
                 type: Object,
                 required: true
-            },
-            user_data: {
-                type: Object, 
-                required: true
             }
         },
-        methods: {},
+        methods: {
+            async likePost() {
+                if(!(this.currentUser in this.liked_users)) {
+                    await api.likePost(localStorage.userId, this.post_data.id)
+                    this.$router.go()
+                }
+            },
+            openSinglePost() {
+                this.$router.push({name: 'post', params: {id: this.post_data.id}})
+            }
+        },
         data() {
             return {
-                userId: Number,
                 post_time: Date,
-                liked_users: []
+                liked_users: [],
+                currentUser: {}
             }
         },
-        mounted() {
+        async mounted() {
             // axios.get('http://localhost:8889/api/posts/getuser' + this.post_data.id).then(response => this.userId = response.data)
-            // axios.get('http://localhost:8889/api/users/' + this.userId).then(response => this.user_data = response.data)
-            axios.get('http://localhost:8889/api/posts/' + this.$route.params.id + '/likedUsers').then(response => this.liked_users = response.data)
+            // axios.get('http://localhost:8889/api/users/' + this.userId).then(response => this.post_data.author = response.data)
+            await axios.get('http://localhost:8889/api/posts/' + this.$route.params.id + '/likedUsers').then(response => this.liked_users = response.data)
+            
+            const response = await api.fetchUser(localStorage.userId)
+            this.currentUser = response.data
         }
     }
 </script>
@@ -158,6 +184,20 @@ import axios from 'axios'
     }
 
     .particle-like:hover ~ .liked-by {
+        opacity: 1;
+    }
+
+    .particle-liked {
+        background-color: red;
+        border: 1px solid red;
+        transition: .15s linear;
+    }
+
+    .particle-liked:hover {
+        background-color: darkred;
+    }
+
+    .particle-liked:hover ~ .liked-by {
         opacity: 1;
     }
 

@@ -7,7 +7,7 @@
             </a>
     
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-              <li><a href="#" class="nav-link px-2 text-white">Posts</a></li>
+              <li><router-link :to="{name: 'index'}" class="nav-link px-2 text-white">Feed</router-link></li>
               <li><router-link :to="{name: 'users'}" class="nav-link px-2 text-white">Users</router-link></li>
               <li><a href="#" class="nav-link px-2 text-white">Messenger</a></li>
             </ul>
@@ -58,7 +58,7 @@
         if (localStorage.userId) {
           localStorage.removeItem('userId')
         }
-        this.$router.push({ name: 'login' })
+        this.$router.go()
       }
     },
     async mounted() {

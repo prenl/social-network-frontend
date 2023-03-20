@@ -159,10 +159,10 @@
                                     <p class="lead fw-normal mb-0">Recent posts</p>
                                     <p class="mb-0"><a href="#!" class="text-muted">Show all</a></p>
                                 </div>
-                                <PostsItem
-                                    v-for="post in user_posts.reverse()"
-                                    :key="post.id"
-                                    :post_data="post"
+                                <PostItem
+                                    v-for="i in user_posts.length"
+                                    :key="i"
+                                    :post_data="user_posts[i-1]"
                                 />
                             </div>
                         </div>
@@ -176,13 +176,12 @@
       {{ users.find(user => user.id == $route.params.id) }} -->
 
 <script>
-import PostsItem from '@/components/PostsItem.vue'
+import PostItem from '@/components/PostItem.vue'
 import OverlayList from './OverlayList.vue';
-import axios from 'axios';
 import { api } from '@/api'
 
 export default {
-    components: { PostsItem, OverlayList },
+    components: { PostItem, OverlayList },
     data() {
         return {
             user_data: {},
@@ -210,11 +209,9 @@ export default {
     },
     methods: {
         showFollowersOverlay() {
-            axios.get('http://localhost:8889/api/users/' + this.$route.params.id + '/followers').then(response => this.user_followers = response.data)
             this.followersOverlay = true
         },
         showFollowingsOverlay() {
-        axios.get('http://localhost:8889/api/users/' + this.$route.params.id + '/followings').then(response => this.user_followings = response.data)
             this.followingsOverlay = true
         },
         closeFollowersOverlay() {
@@ -229,16 +226,20 @@ export default {
             //     usersStore.fetchUsers();
             // }
         
-            const [ userResponse, postsResponse ] = await Promise.all([
+            const [ userResponse, postsResponse, userFollowersResponse, userFollowingsResponse ] = await Promise.all([
                 // axios.get(`http://localhost:8889/api/users/${id}`),
                 api.fetchUser(id),
-                axios.get(`http://localhost:8889/api/users/${id}/posts`)
+                api.fetchUserPosts(id),
+                api.fetchUserFollowers(id),
+                api.fetchUserFollowings(id)
             ])
 
-                // console.log userResponse, postsResponse)
-
+            this.user_followings = userFollowersResponse.data
+            this.user_followers = userFollowingsResponse.data
             this.user_data = userResponse.data
             this.user_posts = postsResponse.data
+
+            console.log(this.user_posts)
 
             // axios.get('http://localhost:8889/api/users/' + this.$route.params.id).then(response => this.user_data = response.data)
             // axios.get('http://localhost:8889/api/posts/postsBy' + this.$route.params.id).then(response => this.user_posts = response.data)

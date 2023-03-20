@@ -1,20 +1,27 @@
 <template>
-    <div class="feeder">
-        <p>Your feed:</p>
+    <div v-if="posts_list.length > 0">
+        <div class="feeder">
+            <p>Your feed:</p>
+        </div>
+        <PostItem
+            v-for="post in posts_list"
+            :post_data="post"
+            :key="post.id"
+        />
     </div>
-    <PostsItem
-        v-for="post in posts_list"
-        :post_data="post"
-        :key="post.id"
-    />
+    <div v-else>
+        <div class="feeder">
+            <p>Your feed is empty</p>
+        </div>
+    </div>
 </template>
 
 <script>
-import PostsItem from '@/components/PostsItem.vue'
+import PostItem from '@/components/PostItem.vue'
 import { api } from '@/api'
 
 export default {
-    components: { PostsItem },
+    components: { PostItem },
     data() {
         return {
             posts_list: []

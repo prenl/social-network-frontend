@@ -8,6 +8,22 @@
             :post_data="post"
             style="margin-bottom: 20px;"
         />
+
+        <div 
+            class="form-outline mb-4" 
+            style="display: flex; flex-direction: column; margin: 0 auto; width: 1200px;"
+        >
+            <textarea 
+                type="text"
+                class="form-control-lg post-content" 
+                placeholder="Comment"
+                rows="4"
+                @input="this.newComment = $event.target.value"
+                v-bind:value="newComment"
+            />
+            <button class="btn btn-outline-success" @click="sendNewComment">Send comment</button>
+        </div>
+
         <div v-if="commentaries.length > 0" style="margin: 0 auto; max-width: 1200px"><h1>Comments</h1></div>
             <div 
                 style="margin-top: 10px;"
@@ -42,7 +58,7 @@
                                 }"
                                 class="post__author"
                             >
-                            {{ comment.author.username }} ({{ comment.author.firstName }} {{ comment.author.lastName }})
+                            {{ comment.author.login }} ({{ comment.author.firstName }} {{ comment.author.lastName }})
                             </router-link>
                         </h6>
                         <p class="text-muted small mb-0">{{ comment.dateOfCreated }}</p>
@@ -57,8 +73,9 @@
 </template>
 
 <script>
-import Navigation from './Navigation.vue';
+import Navigation from './Navigation.vue'
 import PostItem from '@/components/PostItem.vue'
+import { api } from '@/api'
 import axios from 'axios';
 
 export default {
@@ -66,7 +83,19 @@ export default {
     data() {
         return {
             post: {},
-            commentaries: []
+            commentaries: [],
+            newComment: ""
+        }
+    },
+    methods: {
+        async sendNewComment() {
+            if (this.newComment.length > 4) {
+                await api.sendComment(localStorage.userId, this.post.id, this.newComment)
+                this.newComment = ""
+                this.$router.go()
+            } else {
+                alert("Comment should be longer than 4!")
+            }
         }
     },
     mounted() {
