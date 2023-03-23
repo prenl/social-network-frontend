@@ -38,8 +38,7 @@
                 :key="user.id"
                 class="box__list__item"
             >
-                <img src="@/assets/images/avatar-placeholder.jpeg" alt="" class="box__list__item__image">     
-                <router-link :to="{name: 'profile', params: {id: user.id}}">
+                <router-link :to="{name: 'profile', params: {id: user.id}}" style="router-link">
                     <img src="@/assets/images/avatar-placeholder.jpeg" alt="" class="box__list__item__image">     
                     <div class="box__list__item__username">
                         {{ user.login }}
@@ -94,9 +93,20 @@
                                 </button>
                                 <button 
                                     type="button" 
+                                    class="btn btn-outline-dark btn-followed" 
+                                    data-mdb-ripple-color="dark"
+                                    style="z-index: 1;"
+                                    @click="unfollowUser"
+                                    v-else-if="isFollowedByCurrentResponse"
+                                >
+                                    Unfollow
+                                </button>
+                                <button 
+                                    type="button" 
                                     class="btn btn-outline-dark btn-follow" 
                                     data-mdb-ripple-color="dark"
                                     style="z-index: 1;"
+                                    @click="followUser"
                                     v-else
                                 >
                                     Follow
@@ -192,6 +202,7 @@ export default {
             storage: {},
             followersOverlay: false,
             followingsOverlay: false,
+            isFollowedByCurrent: false,
             newPostTitle: "",
             newPostContent: ""
         }
@@ -234,15 +245,10 @@ export default {
                 api.fetchUserFollowings(id)
             ])
 
-            this.user_followings = userFollowersResponse.data
-            this.user_followers = userFollowingsResponse.data
+            this.user_followings = userFollowingsResponse.data
+            this.user_followers = userFollowersResponse.data
             this.user_data = userResponse.data
             this.user_posts = postsResponse.data
-
-            console.log(this.user_posts)
-
-            // axios.get('http://localhost:8889/api/users/' + this.$route.params.id).then(response => this.user_data = response.data)
-            // axios.get('http://localhost:8889/api/posts/postsBy' + this.$route.params.id).then(response => this.user_posts = response.data)
         },
         async sendNewPost() {
             if (this.newPostTitle.length >= 4) {
@@ -257,10 +263,20 @@ export default {
                 alert("Post title should be longer than 4!")
             }
             this.$router.go()
+        },
+        async followUser() {
+            if (this.$route.params.id != localStorage.userId) {
+                api.followUser(localStorage.userId, this.$route.params.id)
+                this.$router.go()
+            }
         }
     },
-    mounted() {
+    async mounted() {
         this.storage = localStorage
+        this.currentUserId = localStorage.userId
+
+        const isFollowedByCurrentResponse = await api.isFollowedByCurrent(this.currentUserId, this.$route.params.id)
+        this.isFollowedByCurrent = isFollowedByCurrentResponse.data
     }
 }
 </script>
@@ -290,7 +306,7 @@ export default {
             min-height: 60px;
             max-height: 60px;
 
-            border: 1px solid #111;
+            border: 1px solid #198754;
             box-shadow: none;
             border-radius: 5px;
             width: 96%;
@@ -298,10 +314,9 @@ export default {
             margin: 2% 0 2% 2%;
 
             &__username {
-                cursor: pointer;
                 font-weight: 500;
                 position: relative;
-                color: #111;
+                color: #198754;
                 left: 70px;
                 top: 5px;
             }
@@ -348,6 +363,25 @@ export default {
     background-color: white;
 }
 
+.btn-followed {
+    border: 1px solid #198754;
+    background-color: #198754;
+    color: white;
+
+    transition: .1s linear;
+}
+
+.btn-followed:hover {
+    background-color: white;
+    color: #198754;
+}
+
+.btn-followed:active {
+    border: 1px solid #198754;
+    background-color: #198754;
+    color: white;
+}
+
 .post-title {
     font-weight: 700;
     font-size: 18px;
@@ -355,7 +389,11 @@ export default {
 
 .post-content {
     font-weight: 400;
-    font-size: 18px;
-    
+    font-size: 18px;   
 }
+
+a {
+    text-decoration: none;
+}
+
 </style>

@@ -26,6 +26,9 @@ export const api = {
 
     fetchUserFollowers: (userId) => axiosInstance.get(`/users/${userId}/followers`),
 
-    fetchUserFollowings: (userId) => axiosInstance.get(`/users/${userId}/followings`)
+    fetchUserFollowings: (userId) => axiosInstance.get(`/users/${userId}/followings`),
 
+    followUser: (originUserId, destinationUserId) => axios.post(`http://localhost:8889/api/users/${originUserId}subscribed/${destinationUserId}`),
+
+    ifUserFollowedAnother: (originUserId, destinationUserId) => axiosInstance.get(`/users/${originUserId}isFollowed/${destinationUserId}`),
 }
